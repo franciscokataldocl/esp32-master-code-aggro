@@ -7,18 +7,24 @@
 unsigned long lastCheckTime = 0;
 const unsigned long checkInterval = 30 * 60 * 1000;
 const unsigned long retryInterval = 3 * 60 * 1000;
+unsigned long rst_millis = 0;
+
 
 void WiFiManager::initWiFi() {
     pinMode(WiFi_rst, INPUT);
     
     String ssid = EEPROMUtils::readStringFromFlash(0);
     String pss = EEPROMUtils::readStringFromFlash(40);
-    
+//     Serial.print("Leyendo SSID desde EEPROM: ");
+// Serial.println(ssid);
+// Serial.print("Leyendo Password desde EEPROM: ");
+// Serial.println(pss);
     WiFi.begin(ssid.c_str(), pss.c_str());
-    delay(3500);
+    delay(5000);
 
     if (WiFi.status() != WL_CONNECTED) {
-        Serial.println("❌ No WiFi, using SmartConfig...");
+        Serial.println("\n");
+        Serial.println("❌ No WiFi, using SmartConfig...\n");
         WiFi.mode(WIFI_AP_STA);
         WiFi.beginSmartConfig();
         
@@ -36,6 +42,10 @@ void WiFiManager::initWiFi() {
 
         EEPROMUtils::writeStringToFlash(WiFi.SSID().c_str(), 0);
         EEPROMUtils::writeStringToFlash(WiFi.psk().c_str(), 40);
+//         Serial.print("Guardando SSID: ");
+// Serial.println(WiFi.SSID());
+// Serial.print("Guardando Password: ");
+// Serial.println(WiFi.psk());
     } else {
         WiFiManager::printWifiData();
 
@@ -89,8 +99,26 @@ void WiFiManager::reconnectWiFi() {
 }
 
 void WiFiManager::printWifiData()  { 
-    Serial.println("\n ✅ WiFi Connected!");
-    Serial.println(WiFi.SSID());
-    Serial.println("IP Address: ");
-    Serial.println(WiFi.localIP());
+    Serial.println("\n ✅ WiFi Connected!........................................................................");
+    Serial.println("Nombre red: " + WiFi.SSID());
+    Serial.println("Ip: " + WiFi.localIP().toString()); 
+    Serial.println("............................................................................................\n ");
+}
+
+void WiFiManager::resetWiFiCredentials() {
+    if (digitalRead(WiFi_rst) == LOW) {  // Asegúrate de que el botón esté presionado
+        if (millis() - rst_millis >= 3000) {  // Mantén presionado por 3 segundos
+        Serial.println("\n 🔫 Eliminando credenciales wifi....................................................");
+            Serial.println("");
+            EEPROMUtils::writeStringToFlash("", 0);  // Borrar SSID
+            EEPROMUtils::writeStringToFlash("", 40); // Borrar la contraseña
+            Serial.println("Credenciales Wifi eliminadas");
+            Serial.println("Reiniciando dispositivo");
+             Serial.println(".................................................................................\n");
+            delay(500);
+            ESP.restart(); // Reiniciar el ESP
+        }
+    } else {
+        rst_millis = millis(); // Resetear el tiempo si el botón no está presionado
+    }
 }

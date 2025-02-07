@@ -10,6 +10,7 @@ public:
     static bool isInternetAvailable();
     static void reconnectWiFi();
     static void printWifiData();
+    static void resetWiFiCredentials();
 };
 
 #endif

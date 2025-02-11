@@ -3,6 +3,8 @@
 
 #include <Arduino.h>
 
+extern bool haveInternet;
+
 class WiFiManager {
 public:
     static void initWiFi();
@@ -10,7 +12,10 @@ public:
     static bool isInternetAvailable();
     static void reconnectWiFi();
     static void printWifiData();
-    static void resetWiFiCredentials();
+    
+private:
+    static void startSmartConfig();
+    static void checkInternetStatus();
 };
 
 #endif

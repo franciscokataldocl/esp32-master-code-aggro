@@ -1,11 +1,11 @@
 #include "resetWifiCredentials.h"
-#include "../../eeprom/eepRomUtils.h" // Asegúrate de incluir el archivo donde esté la lógica de EEPROM
+#include "../../eeprom/eepRomUtils.h" 
 #include <EEPROM.h>
-
-#define EEPROM_SIZE 200  // Tamaño de EEPROM, asegúrate de que sea suficiente
+#include <WiFi.h>  // Asegúrate de incluir esta librería
+#include "config/config.h"  
 
 namespace {
-    int WiFi_rst;  // Variable para almacenar el pin del botón
+    int WiFi_rst;  
     unsigned long rst_millis = 0;
     bool buttonPressed = false;
 }
@@ -22,18 +22,25 @@ void ResetWifiCredentials::checkReset() {
             buttonPressed = true;
         }
         // Si han pasado más de 3 segundos
-        if (millis() - rst_millis >= 3000) { 
+        if (millis() - rst_millis >= WIFI_RESET_BUTTON_PRESSED_TIME) { 
             Serial.println("\n🔄 Eliminando credenciales WiFi...");
             
-            // Borrar credenciales sobrescribiendo los mismos espacios de memoria
-            EEPROMUtils::writeStringToFlash("", 0);   // Borrar SSID
-            EEPROMUtils::writeStringToFlash("", 40);  // Borrar contraseña
-            
+            // 1️⃣ Borrar credenciales de EEPROM
+            EEPROMUtils::writeStringToFlash("", SSID_ADDRESS);
+            EEPROMUtils::writeStringToFlash("", PASSWORD_ADDRESS);
+
+            // 2️⃣ Borrar credenciales de WiFi NVS
+            Serial.println("🔥 Eliminando credenciales de NVS...");
+            WiFi.disconnect(true, true);  // Borra credenciales y desconecta
+            WiFi.mode(WIFI_OFF); // Apaga el WiFi para asegurar el borrado
+
+            delay(1000);  // Espera 1 segundo para aplicar los cambios
+
             Serial.println("✅ Credenciales eliminadas. Reiniciando dispositivo...");
             delay(500);
-            ESP.restart();
+            ESP.restart(); // Reinicia el ESP32
         }
-    } else { // Si el botón no está presionado, reiniciar la lógica
+    } else { 
         buttonPressed = false;
     }
 }

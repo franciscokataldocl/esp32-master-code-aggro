@@ -5,6 +5,7 @@
 #include <Arduino_JSON.h> // Agrega la librería Arduino_JSON
 #include "config/device_id/device_id.h"
 #include "common/time_helper/timeHelper.h"
+#include "config/config.h"
 
 void ConnectionLogger::logConnectionEvent() {
     Serial.println("✅ Conectado a Internet. Registrando evento...");
@@ -41,7 +42,7 @@ void ConnectionLogger::sendWifiLog() {
         Serial.println(jsonString);
 
         // Enviar el POST a la ruta /wifistatus
-        http.begin("http://localhost:8080/wifistatus");
+        http.begin(String(BASE_URL) + "/wifistatus");
         http.addHeader("Content-Type", "application/json");
         int httpResponseCode = http.POST(jsonString);
 

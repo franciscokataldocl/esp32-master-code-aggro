@@ -1,25 +1,25 @@
 #include "wifiManager.h"
 #include "../eeprom/eepRomUtils.h"
-#include "../wifi/logger/wifiConnectionLogger.h"
+#include "internet/connectionLogger/connectionLogger.h"
 #include <WiFi.h>
 #include <HTTPClient.h>
 #include "../../sensors/wifi/wifiLedControl.h"
+#include "config/config.h"
 
-// Variables globales
+
+ unsigned long lastCheckTime = 0;
+unsigned long lastRetryTime = 0;
 bool haveInternet = false;
 bool loggedNoInternet = false;
+unsigned long lastInternetCheck = 0;
+int reconnectCounter = 0;
 
-unsigned long lastCheckTime = 0;
-const unsigned long checkInterval = 10 * 1000;  // Verifica cada 10 segundos
-unsigned long lastRetryTime = 0;
-const unsigned long retryInterval = 5 * 1000;   // Reintenta conectar cada 5 segundos
-
-void WiFiManager::initWiFi() {
-    String ssid = EEPROMUtils::readStringFromFlash(0);
+void WiFiManager::initWiFi(ConnectionLogger &logger) { //✅ Corrige esta firma
+    String ssid = EEPROMUtils::readStringFromFlash(SSID_ADDRESS);
     String pss = EEPROMUtils::readStringFromFlash(40);
 
     WiFi.begin(ssid.c_str(), pss.c_str());
-    
+
     unsigned long startWait = millis();
     while (millis() - startWait < 5000) {
         // Permite que otras tareas se ejecuten
@@ -28,22 +28,25 @@ void WiFiManager::initWiFi() {
     if (WiFi.status() == WL_CONNECTED) {
         haveInternet = true;
         WifiLedControl::turnOnLed(false);
+        logger.logEvent("ONLINE");  // ✅ ahora logger es accesible
     } else {
         startSmartConfig();
+        logger.logEvent("OFFLINE");  // ✅ ahora logger es accesible
     }
-    ConnectionLogger::logConnectionEvent();
+
     WiFiManager::printWifiData();
 }
+
 
 void WiFiManager::handleWiFi() {
     if (WiFi.status() != WL_CONNECTED) {
         WifiLedControl::turnOnLed(true);
-        if (millis() - lastRetryTime >= retryInterval) {
+        if (millis() - lastRetryTime >= RETRY_INTERVAL) {
             lastRetryTime = millis();
             Serial.println("❌ No Internet, retrying...");
             reconnectWiFi();
         }
-    } else if (millis() - lastCheckTime >= checkInterval) {
+    } else if (millis() - lastCheckTime >= CHECK_INTERVAL) {
         lastCheckTime = millis();
         checkInternetStatus();
     }
@@ -87,7 +90,6 @@ void WiFiManager::checkInternetStatus() {
         if (!haveInternet) {
             Serial.println("✅ Internet restored!");
             WifiLedControl::turnOnLed(false);
-            ConnectionLogger::logConnectionEvent();
         }
         haveInternet = true;
         loggedNoInternet = false;
@@ -143,4 +145,35 @@ void WiFiManager::printWifiData() {
     Serial.println("\n✅ WiFi Connected!");
     Serial.println("Nombre red: " + WiFi.SSID());
     Serial.println("IP: " + WiFi.localIP().toString());
+}
+
+void WiFiManager::handleInternetCheck(ConnectionLogger &logger) {
+    if (millis() - lastInternetCheck < 1000) return; // comprobar cada segundo la lógica interna
+    lastInternetCheck = millis();
+
+    bool internetStatus = isInternetAvailable();
+
+    static bool previousInternetStatus = true;
+
+    if (internetStatus) {
+        if (!previousInternetStatus) {
+            Serial.println("✅ Internet restaurado.");
+            logger.logEvent("ONLINE");
+        }
+        previousInternetStatus = true;
+        reconnectCounter = 0;
+    } else {
+        if (previousInternetStatus || reconnectCounter == 0) {
+            Serial.println("❌ Internet perdido.");
+            logger.logEvent("OFFLINE");
+        }
+        previousInternetStatus = false;
+        reconnectCounter++;
+
+        if (reconnectCounter <= 3) {
+            delay(60000); // Espera 1 minuto primeros intentos
+        } else {
+            delay(300000); // Espera 5 minutos después
+        }
+    }
 }

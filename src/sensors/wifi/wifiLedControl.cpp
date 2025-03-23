@@ -1,14 +1,15 @@
 #include "wifiLedControl.h"
+#include "config/config.h"
 
 
-const int redLedPin = 23; 
+
 
 void WifiLedControl::turnOnLed(bool turnOn) {
-    pinMode(redLedPin, OUTPUT);
+    pinMode(WIFI_LED_RED_PIN, OUTPUT);
     if(turnOn == 1){
-        digitalWrite(redLedPin, HIGH); 
+        digitalWrite(WIFI_LED_RED_PIN, HIGH); 
     } else{
-        digitalWrite(redLedPin, LOW); 
+        digitalWrite(WIFI_LED_RED_PIN, LOW); 
     }
 
     

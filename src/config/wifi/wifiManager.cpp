@@ -27,11 +27,12 @@ void WiFiManager::initWiFi(ConnectionLogger &logger) { //✅ Corrige esta firma
 
     if (WiFi.status() == WL_CONNECTED) {
         haveInternet = true;
+        initTime();  // 👈 Llamar explícitamente aquí
+
         WifiLedControl::turnOnLed(false);
         logger.logEvent("ONLINE");  // ✅ ahora logger es accesible
     } else {
         startSmartConfig();
-        logger.logEvent("OFFLINE");  // ✅ ahora logger es accesible
     }
 
     WiFiManager::printWifiData();
@@ -164,7 +165,6 @@ void WiFiManager::handleInternetCheck(ConnectionLogger &logger) {
     } else {
         if (previousInternetStatus || reconnectCounter == 0) {
             Serial.println("❌ Internet perdido.");
-            // ⚠️ No guardes eventos OFFLINE aquí, pero sí mantén los mensajes para debug
         }
         previousInternetStatus = false;
         reconnectCounter++;

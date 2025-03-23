@@ -28,16 +28,16 @@ void readSensorsAndSendMQTT() {
     Serial.print("🎨 Color leído RGB: ");
     Serial.print(r); Serial.print(", "); Serial.print(g); Serial.print(", "); Serial.println(b);
 
-    String logs = sdCard.readFromFile("/offline_events.json");
+    String logs = sdCard.readFromFile("/events.json");
     if (logs != "") {
         Serial.println("Enviando datos por MQTT: " + logs);
-        sdCard.deleteFile("/offline_events.json");
+        sdCard.deleteFile("/events.json");
     }
 }
 
 void printStoredEvents() {
-    Serial.println("📄 Eventos offline actuales:");
-    String data = sdCard.readFromFile("/offline_events.json");
+    Serial.println("📄 Eventos actuales:");
+    String data = sdCard.readFromFile("/events.json");
 
     if (data.length() > 0) {
         Serial.println("Contenido del archivo:");

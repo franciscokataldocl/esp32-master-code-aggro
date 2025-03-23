@@ -27,6 +27,24 @@ bool MicroSD::writeToFile(const char* filename, const String &data) {
 }
 
 String MicroSD::readFromFile(const char* filename) {
+    if (!SD.exists(filename)) {
+        Serial.print(F("⚠️ El archivo no existe, creando: "));
+        Serial.println(filename);
+        
+        File newFile = SD.open(filename, FILE_WRITE); // Crear archivo nuevo vacío
+        if(newFile) {
+            newFile.println("{}"); // Inicializar con contenido válido vacío (o ajusta según tu formato JSON)
+            newFile.close();
+            Serial.print(F("✅ Archivo creado: "));
+            Serial.println(filename);
+        } else {
+            Serial.print(F("⚠️ Error creando el archivo: "));
+            Serial.println(filename);
+            return "";
+        }
+    }
+
+    // Ahora sí puedes abrirlo en modo lectura
     File file = SD.open(filename, FILE_READ);
     if (!file) {
         Serial.print(F("⚠️ Error abriendo el archivo para lectura: "));

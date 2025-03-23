@@ -2,10 +2,15 @@
 #include "config/wifi/wifiManager.h"
 #include "config/wifi/reset/resetWifiCredentials.h"
 #include <EEPROM.h>
+#include "time.h"
+
 
 #define EEPROM_SIZE 200
 #define WIFI_RESET_PIN 22
 
+const char* ntpServer = "pool.ntp.org";
+const long gmtOffset_sec = -3 * 3600;   // Chile GMT-3
+const int daylightOffset_sec = 0;
 
 
 MicroSD sdCard;
@@ -23,7 +28,7 @@ void initSystem() {
         Serial.println("✅ SD inicializada correctamente");
       }
       // Inmediatamente después leer para verificar:
-String contenido = sdCard.readFromFile("/offline_events.json");
+String contenido = sdCard.readFromFile("/events.json");
 if (contenido != "") {
   Serial.println("✅ Contenido leído del archivo:");
   Serial.println(contenido);
@@ -74,4 +79,17 @@ void initSensorColorCalibration() {
             colorSensor.calibrate();
         }
     }
+}
+
+
+void initTime(){
+    configTime(gmtOffset_sec, daylightOffset_sec, ntpServer);
+    Serial.print("⏳ Obteniendo hora desde NTP...");
+    
+    struct tm timeinfo;
+    if(!getLocalTime(&timeinfo)){
+        Serial.println("❌ Error: No se obtuvo hora NTP");
+        return;
+    }
+    Serial.println("✅ Hora NTP configurada correctamente");
 }

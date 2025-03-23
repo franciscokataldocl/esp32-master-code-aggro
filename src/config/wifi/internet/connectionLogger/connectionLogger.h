@@ -12,7 +12,7 @@ class ConnectionLogger {
 
   private:
     MicroSD& _sd;
-    const char* filename = "/offline_events.json";
+    const char* filename = "/events.json";
 };
 
 #endif

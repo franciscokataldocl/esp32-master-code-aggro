@@ -152,20 +152,19 @@ void WiFiManager::handleInternetCheck(ConnectionLogger &logger) {
     lastInternetCheck = millis();
 
     bool internetStatus = isInternetAvailable();
-
     static bool previousInternetStatus = true;
 
     if (internetStatus) {
         if (!previousInternetStatus) {
             Serial.println("✅ Internet restaurado.");
-            logger.logEvent("ONLINE");
+            logger.logEvent("ONLINE"); // ✅ Solo eventos ONLINE
         }
         previousInternetStatus = true;
         reconnectCounter = 0;
     } else {
         if (previousInternetStatus || reconnectCounter == 0) {
             Serial.println("❌ Internet perdido.");
-            logger.logEvent("OFFLINE");
+            // ⚠️ No guardes eventos OFFLINE aquí, pero sí mantén los mensajes para debug
         }
         previousInternetStatus = false;
         reconnectCounter++;

@@ -18,7 +18,18 @@ void initSystem() {
 
     if (!sdCard.begin()) {
         Serial.println("⚠️ Falló inicialización SD.");
-    }
+        while(true); // Detener aquí para no continuar sin SD
+      } else {
+        Serial.println("✅ SD inicializada correctamente");
+      }
+      // Inmediatamente después leer para verificar:
+String contenido = sdCard.readFromFile("/offline_events.json");
+if (contenido != "") {
+  Serial.println("✅ Contenido leído del archivo:");
+  Serial.println(contenido);
+} else {
+  Serial.println("⚠️ Archivo vacío o error en lectura.");
+}
 
     WiFiManager::initWiFi(logger);
     colorSensor.begin();

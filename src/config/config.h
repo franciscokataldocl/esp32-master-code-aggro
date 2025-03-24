@@ -3,6 +3,8 @@
 #define CONFIG_H
 
 
+#define DEBUG_MODE true
+
 //HTTP DATA
 #define BASE_URL "http://localhost:8080"
 

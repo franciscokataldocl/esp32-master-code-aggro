@@ -18,6 +18,7 @@ const int daylightOffset_sec = 0;
 MicroSD sdCard;
 ConnectionLogger logger(sdCard);
 
+extern unsigned long bootTime; 
 
 void initSystem() {
     ResetWifiCredentials::begin(WIFI_RESET_PIN);
@@ -37,9 +38,7 @@ void initSystem() {
     }
 
     WiFiManager::initWiFi(logger);
-    colorSensor.begin();        // Inicializa hardware del sensor
-    initSensors();              // ✅ INICIALIZA LA EJECUCIÓN PROGRAMADA DE SENSORES
-    initSensorColorCalibration();
+    initSensors();
 }
 
 void initSensorColorCalibration() {

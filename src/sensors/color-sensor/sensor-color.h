@@ -12,6 +12,8 @@ public:
     void getRGB(int &r, int &g, int &b);
     void print();
     void setCalibration(int minRed, int minGreen, int minBlue, int maxRed, int maxGreen, int maxBlue);
+    void esperarConIndicador(unsigned long ms);  // 👈 declara la función
+
 
 
 private:

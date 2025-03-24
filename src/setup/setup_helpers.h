@@ -7,4 +7,7 @@ void initSystem();
 void initSensorColorCalibration();
 void initTime();
 
+extern unsigned long bootTime;
+
+
 #endif

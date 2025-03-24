@@ -7,18 +7,21 @@
 #include "config/wifi/reset/resetWifiCredentials.h"
 #include "sensors/sensors.h"
 
-#define DEBUG_MODE true
+
 
 extern MicroSD sdCard;
 extern ConnectionLogger logger;
 extern SensorColor colorSensor;
 
-
+unsigned long taskStartTime = 0;
+bool taskTimerStarted = false;
+bool firstSensorRunDone = false;
 
 const unsigned long SENSOR_INTERVAL = 1800000;  // 30 minutos
-const unsigned long INITIAL_DELAY = DEBUG_MODE ? 5000 : 60000;  // 5 seg en debug, 1 min en prod
+const unsigned long INITIAL_DELAY = DEBUG_MODE ? 5000 : 60000;  // 1 minuto normal, 5 seg debug
 
-unsigned long lastSensorRead = millis(); 
+unsigned long lastSensorRead = 0;
+
 
 void handleTasks() {
     ResetWifiCredentials::checkReset();  // 👈 este va al inicio
@@ -29,17 +32,25 @@ void handleTasks() {
 
 void handlePeriodicTasks() {
     unsigned long now = millis();
-    static bool firstCycle = true;
 
-    if (firstCycle && now >= INITIAL_DELAY) {
-        lastSensorRead = now;
-        updateSensors();
-        printStoredEvents();
-        firstCycle = false;
+    if (!taskTimerStarted) {
+        taskStartTime = now;
+        taskTimerStarted = true;
         return;
     }
 
-    if (!firstCycle && now - lastSensorRead >= SENSOR_INTERVAL) {
+    if (!firstSensorRunDone) {
+        if (now - taskStartTime >= INITIAL_DELAY) {
+            Serial.printf("✅ Espera inicial superada (%lu ms)\n", now - taskStartTime);
+            updateSensors();
+            printStoredEvents();
+            firstSensorRunDone = true;
+            lastSensorRead = now;
+        }
+        return;
+    }
+
+    if (now - lastSensorRead >= SENSOR_INTERVAL) {
         lastSensorRead = now;
         updateSensors();
         printStoredEvents();

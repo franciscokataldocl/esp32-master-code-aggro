@@ -5,12 +5,21 @@
 
 // 🔹 Constructor sin parámetros
 SensorColor::SensorColor()
-    : _s0(SENSOR_S0), _s1(SENSOR_S1), _s2(SENSOR_S2), _s3(SENSOR_S3),
-      _out(SENSOR_OUT), _ledPin(SENSOR_LED), lastReadTime(0) {}
+
+
+: _s0(SENSOR_S0), _s1(SENSOR_S1), _s2(SENSOR_S2), _s3(SENSOR_S3),
+_out(SENSOR_OUT), _ledPin(SENSOR_LED), lastReadTime(0),
+_minRed(0), _maxRed(1023),
+_minGreen(0), _maxGreen(1023),
+_minBlue(0), _maxBlue(1023) {}
 
 // 🔹 Constructor con parámetros
 SensorColor::SensorColor(int s0, int s1, int s2, int s3, int out, int ledPin)
-    : _s0(s0), _s1(s1), _s2(s2), _s3(s3), _out(out), _ledPin(ledPin), lastReadTime(0) {}
+    : _s0(s0), _s1(s1), _s2(s2), _s3(s3), _out(out), _ledPin(ledPin), lastReadTime(0),
+      _minRed(0), _maxRed(1023),
+      _minGreen(0), _maxGreen(1023),
+      _minBlue(0), _maxBlue(1023)
+{}
 
 void SensorColor::begin() {
     pinMode(_s0, OUTPUT);
@@ -47,7 +56,7 @@ void SensorColor::calibrate() {
     Serial.println("🛠️ Iniciando calibración del sensor de color...");
 
     Serial.println("🔴 Paso 1: Cubre el sensor o apúntalo a una superficie negra.");
-    delay(10000);
+    esperarConIndicador(10000);  // Espera 10 seg
 
     _minRed = readRed();
     _minGreen = readGreen();
@@ -59,7 +68,7 @@ void SensorColor::calibrate() {
     Serial.print("   🔵 Min Blue: "); Serial.println(_minBlue);
 
     Serial.println("\n⚪ Paso 2: Apunta el sensor a una hoja blanca bien iluminada.");
-    delay(10000);
+    esperarConIndicador(10000);  // Espera 10 seg
 
     _maxRed = readRed();
     _maxGreen = readGreen();
@@ -136,4 +145,13 @@ int SensorColor::readBlue() {
 
     digitalWrite(_ledPin, LOW);  // Apaga los LEDs
     return value;
+}
+
+void SensorColor::esperarConIndicador(unsigned long ms) {
+    unsigned long start = millis();
+    while (millis() - start < ms) {
+        delay(1);  // Deja respirar al sistema (WiFi, background, etc.)
+        Serial.print(".");
+    }
+    Serial.println();  // Salto de línea al finalizar
 }

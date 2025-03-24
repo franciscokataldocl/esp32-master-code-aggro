@@ -4,10 +4,12 @@
 #include "common/microsd/microSd.h"
 #include "config/wifi/internet/connectionLogger/connectionLogger.h"
 #include "sensors/color-sensor/sensor-color.h"
+#include "config/wifi/reset/resetWifiCredentials.h" 
 
 unsigned long lastSensorRead = 0;
 
 void handleTasks() {
+    ResetWifiCredentials::checkReset();  // 👈 este va al inicio
     WiFiManager::handleWiFi();
     WiFiManager::handleInternetCheck(logger);
     handlePeriodicTasks();

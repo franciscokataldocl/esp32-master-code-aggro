@@ -13,5 +13,7 @@ extern SensorColor colorSensor;
 
 void initSystem();
 void initSensorColorCalibration();
+void initTime();  
+
 
 #endif

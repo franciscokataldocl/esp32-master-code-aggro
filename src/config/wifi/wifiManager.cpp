@@ -3,8 +3,14 @@
 #include "internet/connectionLogger/connectionLogger.h"
 #include <WiFi.h>
 #include <HTTPClient.h>
+#include <ArduinoJson.h>
+
 #include "../../sensors/wifi/wifiLedControl.h"
 #include "config/config.h"
+#include "../../setup/setup_helpers.h"
+#include "common/microsd/microSd.h"
+
+
 
 
  unsigned long lastCheckTime = 0;
@@ -15,8 +21,23 @@ unsigned long lastInternetCheck = 0;
 int reconnectCounter = 0;
 
 void WiFiManager::initWiFi(ConnectionLogger &logger) { //✅ Corrige esta firma
-    String ssid = EEPROMUtils::readStringFromFlash(SSID_ADDRESS);
-    String pss = EEPROMUtils::readStringFromFlash(40);
+    String ssid = "";
+    String pss = "";
+
+    String credData = sdCard.readFromFile("/wifi_credentials.json");
+
+    if (credData != "") {
+        StaticJsonDocument<512> doc;
+        DeserializationError error = deserializeJson(doc, credData);
+        if (!error) {
+            ssid = doc["ssid"].as<String>();
+            pss = doc["password"].as<String>();
+        } else {
+            Serial.println("⚠️ Error al leer credenciales desde SD");
+        }
+    } else {
+        Serial.println("⚠️ No se encontró el archivo de credenciales en SD");
+    }
 
     WiFi.begin(ssid.c_str(), pss.c_str());
 
@@ -30,6 +51,7 @@ void WiFiManager::initWiFi(ConnectionLogger &logger) { //✅ Corrige esta firma
         initTime();  // 👈 Llamar explícitamente aquí
 
         WifiLedControl::turnOnLed(false);
+
         logger.logEvent("ONLINE");  // ✅ ahora logger es accesible
     } else {
         startSmartConfig();
@@ -76,9 +98,18 @@ void WiFiManager::startSmartConfig() {
     }
 
     if (WiFi.status() == WL_CONNECTED) {
-        EEPROMUtils::writeStringToFlash(WiFi.SSID().c_str(), 0);
-        EEPROMUtils::writeStringToFlash(WiFi.psk().c_str(), 40);
-        Serial.println("✅ WiFi guardado en EEPROM");
+        StaticJsonDocument<512> doc;
+        doc["ssid"] = WiFi.SSID();
+        doc["password"] = WiFi.psk();
+        
+        String json;
+        serializeJson(doc, json);
+        sdCard.writeToFile("/wifi_credentials.json", json);
+        
+        Serial.println("✅ WiFi guardado en SD (/wifi_credentials.json)");
+        
+        initTime(); // ⏱️ sincroniza hora tras conexión
+        logger.logEvent("ONLINE");  // ✅ AGREGA ESTA LÍNEA
     } else {
         Serial.println("⏳ No se pudo conectar con SmartConfig.");
     }

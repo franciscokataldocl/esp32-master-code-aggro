@@ -82,14 +82,24 @@ void initSensorColorCalibration() {
 }
 
 
-void initTime(){
+void initTime() {
+    Serial.println("⏳ Intentando sincronizar hora NTP...");
     configTime(gmtOffset_sec, daylightOffset_sec, ntpServer);
-    Serial.print("⏳ Obteniendo hora desde NTP...");
-    
+
     struct tm timeinfo;
-    if(!getLocalTime(&timeinfo)){
-        Serial.println("❌ Error: No se obtuvo hora NTP");
-        return;
+    int retry = 0;
+    const int retry_count = 10;
+
+    while (!getLocalTime(&timeinfo) && retry < retry_count) {
+        Serial.print(".");
+        delay(1000);
+        retry++;
     }
-    Serial.println("✅ Hora NTP configurada correctamente");
+
+    if(retry == retry_count){
+        Serial.println("\n❌ Falló sincronización NTP.");
+    } else {
+        Serial.println("\n✅ Tiempo sincronizado:");
+        Serial.println(&timeinfo, "%Y-%m-%dT%H:%M:%S");
+    }
 }

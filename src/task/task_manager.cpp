@@ -16,11 +16,11 @@ void handleTasks() {
 }
 
 void handlePeriodicTasks() {
-    if (millis() - lastSensorRead >= 1800000) { // 30 minutos
+    if (millis() - lastSensorRead >= 1800000) {
         lastSensorRead = millis();
 
-        readSensorsAndSendMQTT();
-        printStoredEvents();
+        updateSensors(10000);  // actualiza todos los sensores
+        printStoredEvents();   // imprime eventos almacenados
     }
 }
 

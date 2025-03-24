@@ -4,7 +4,8 @@
 #include <Arduino.h>
 #include "common/microsd/microSd.h"
 #include "config/wifi/internet/connectionLogger/connectionLogger.h"
-#include "sensors/color-sensor/sensor-color.h"
+#include "sensors/sensors.h"
+
 
 // Extern aquí claramente:
 extern MicroSD sdCard;
@@ -14,6 +15,8 @@ extern SensorColor colorSensor;
 void initSystem();
 void initSensorColorCalibration();
 void initTime();  
+void initSensors(); // ✅ Inicializa sensores unificados
+
 
 
 #endif

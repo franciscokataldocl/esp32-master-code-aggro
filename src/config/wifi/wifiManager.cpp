@@ -10,7 +10,8 @@
 #include "../../setup/setup_helpers.h"
 #include "common/microsd/microSd.h"
 
-
+extern MicroSD sdCard;
+extern ConnectionLogger logger;
 
 
  unsigned long lastCheckTime = 0;
@@ -98,7 +99,8 @@ void WiFiManager::startSmartConfig() {
     }
 
     if (WiFi.status() == WL_CONNECTED) {
-        StaticJsonDocument<512> doc;
+        DynamicJsonDocument doc(512);
+
         doc["ssid"] = WiFi.SSID();
         doc["password"] = WiFi.psk();
         

@@ -3,6 +3,8 @@
 #include "config/wifi/reset/resetWifiCredentials.h"
 #include <EEPROM.h>
 #include "time.h"
+#include "sensors/color-sensor/sensor-color.h"
+
 
 
 #define EEPROM_SIZE 200

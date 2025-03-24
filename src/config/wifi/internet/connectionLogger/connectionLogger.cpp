@@ -19,7 +19,8 @@ String ConnectionLogger::getCurrentTimestamp() {
 
 void ConnectionLogger::logEvent(const String& status) {
   String fileContent = _sd.readFromFile(filename);
-  StaticJsonDocument<2048> doc;
+  DynamicJsonDocument doc(2048);
+
 
   if (fileContent.length() > 0) {
     deserializeJson(doc, fileContent);

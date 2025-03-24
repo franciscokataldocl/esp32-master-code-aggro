@@ -4,7 +4,13 @@
 #include "common/microsd/microSd.h"
 #include "config/wifi/internet/connectionLogger/connectionLogger.h"
 #include "sensors/color-sensor/sensor-color.h"
-#include "config/wifi/reset/resetWifiCredentials.h" 
+#include "config/wifi/reset/resetWifiCredentials.h"
+#include "sensors/sensors.h"
+
+
+extern MicroSD sdCard;
+extern ConnectionLogger logger;
+extern SensorColor colorSensor;
 
 unsigned long lastSensorRead = 0;
 
@@ -19,7 +25,8 @@ void handlePeriodicTasks() {
     if (millis() - lastSensorRead >= 1800000) {
         lastSensorRead = millis();
 
-        updateSensors(10000);  // actualiza todos los sensores
+        updateSensors();
+  // actualiza todos los sensores
         printStoredEvents();   // imprime eventos almacenados
     }
 }

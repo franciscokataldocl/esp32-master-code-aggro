@@ -1,13 +1,13 @@
 #include "setup_helpers.h"
 #include "config/wifi/wifiManager.h"
 #include "config/wifi/reset/resetWifiCredentials.h"
-#include <EEPROM.h>
 #include "time.h"
 #include "sensors/color-sensor/sensor-color.h"
+#include "sensors/sensors.h"  // Incluye la cabecera donde está extern
 
 
 
-#define EEPROM_SIZE 200
+
 #define WIFI_RESET_PIN 22
 
 const char* ntpServer = "pool.ntp.org";
@@ -17,35 +17,34 @@ const int daylightOffset_sec = 0;
 
 MicroSD sdCard;
 ConnectionLogger logger(sdCard);
-SensorColor colorSensor;
+
 
 void initSystem() {
-    EEPROM.begin(EEPROM_SIZE);
     ResetWifiCredentials::begin(WIFI_RESET_PIN);
 
     if (!sdCard.begin()) {
         Serial.println("⚠️ Falló inicialización SD.");
-        while(true); // Detener aquí para no continuar sin SD
-      } else {
+        while(true);
+    } else {
         Serial.println("✅ SD inicializada correctamente");
-      }
-      // Inmediatamente después leer para verificar:
-String contenido = sdCard.readFromFile("/events.json");
-if (contenido != "") {
-  Serial.println("✅ Contenido leído del archivo:");
-  Serial.println(contenido);
-} else {
-  Serial.println("⚠️ Archivo vacío o error en lectura.");
-}
+    }
+
+    String contenido = sdCard.readFromFile(EVENTS_LOG_PATH);
+    if (contenido != "") {
+        Serial.println("✅ Contenido leído del archivo:");
+        Serial.println(contenido);
+    } else {
+        Serial.println("⚠️ Archivo vacío o error en lectura.");
+    }
 
     WiFiManager::initWiFi(logger);
-    colorSensor.begin();
-
+    colorSensor.begin();        // Inicializa hardware del sensor
+    initSensors();              // ✅ INICIALIZA LA EJECUCIÓN PROGRAMADA DE SENSORES
     initSensorColorCalibration();
 }
 
 void initSensorColorCalibration() {
-    String data = sdCard.readFromFile("/calibration.txt");
+    String data = sdCard.readFromFile(CALIBRATION_FILE_PATH);
     
     if (data == "") {
         Serial.println("⚠️ No hay datos de calibración. Calibrando...");
@@ -58,7 +57,7 @@ void initSensorColorCalibration() {
         String calibData = String(minR) + "," + String(minG) + "," + String(minB) + "," +
                            String(maxR) + "," + String(maxG) + "," + String(maxB);
 
-        sdCard.writeToFile("/calibration.txt", calibData);
+        sdCard.writeToFile(CALIBRATION_FILE_PATH, calibData);
         colorSensor.setCalibration(minR, minG, minB, maxR, maxG, maxB);
     } else {
         int values[6];

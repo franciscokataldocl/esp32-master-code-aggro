@@ -12,14 +12,16 @@ std::vector<std::function<void()>> sensorSequence;
 size_t currentSensorIndex = 0;
 
 void initSensors() {
-    colorSensor.begin();
+    colorSensor.begin();  // 👉 Esto inicializa el sensor de color
 
-    // ⚠️ Este es el orden en que se ejecutarán
+    // ORDEN DE EJECUCIÓN
     sensorSequence.push_back([]() {
-        soilSensor.printValues();
+        Serial.println("🌱 Ejecutando sensor de humedad...");
+        soilSensor.printValues();  // 💧
     });
 
     sensorSequence.push_back([]() {
+        Serial.println("🎨 Ejecutando sensor de color...");
         int r, g, b;
         colorSensor.getRGB(r, g, b);
         Serial.printf("🎨 Sensor color RGB: %d, %d, %d\n", r, g, b);

@@ -1,5 +1,4 @@
 #include "wifiConnectionLogger.h"
-#include <EEPROM.h>
 #include <WiFi.h>
 #include <HTTPClient.h>  // Agrega la librería HTTPClient
 #include <Arduino_JSON.h> // Agrega la librería Arduino_JSON

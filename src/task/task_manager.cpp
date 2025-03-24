@@ -7,12 +7,18 @@
 #include "config/wifi/reset/resetWifiCredentials.h"
 #include "sensors/sensors.h"
 
+#define DEBUG_MODE true
 
 extern MicroSD sdCard;
 extern ConnectionLogger logger;
 extern SensorColor colorSensor;
 
-unsigned long lastSensorRead = 0;
+
+
+const unsigned long SENSOR_INTERVAL = 1800000;  // 30 minutos
+const unsigned long INITIAL_DELAY = DEBUG_MODE ? 5000 : 60000;  // 5 seg en debug, 1 min en prod
+
+unsigned long lastSensorRead = millis() - (SENSOR_INTERVAL - INITIAL_DELAY);
 
 void handleTasks() {
     ResetWifiCredentials::checkReset();  // 👈 este va al inicio
@@ -22,7 +28,7 @@ void handleTasks() {
 }
 
 void handlePeriodicTasks() {
-    if (millis() - lastSensorRead >= 1800000) {
+    if (millis() - lastSensorRead >= SENSOR_INTERVAL) {
         lastSensorRead = millis();
 
         updateSensors();
@@ -37,16 +43,16 @@ void readSensorsAndSendMQTT() {
     Serial.print("🎨 Color leído RGB: ");
     Serial.print(r); Serial.print(", "); Serial.print(g); Serial.print(", "); Serial.println(b);
 
-    String logs = sdCard.readFromFile("/events.json");
+    String logs = sdCard.readFromFile(EVENTS_LOG_PATH);
     if (logs != "") {
         Serial.println("Enviando datos por MQTT: " + logs);
-        sdCard.deleteFile("/events.json");
+        sdCard.deleteFile(EVENTS_LOG_PATH);
     }
 }
 
 void printStoredEvents() {
     Serial.println("📄 Eventos actuales:");
-    String data = sdCard.readFromFile("/events.json");
+    String data = sdCard.readFromFile(EVENTS_LOG_PATH);
 
     if (data.length() > 0) {
         Serial.println("Contenido del archivo:");

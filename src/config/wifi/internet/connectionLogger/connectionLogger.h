@@ -3,6 +3,7 @@
 
 #include <Arduino.h>
 #include "../../../../common/microsd/microSd.h"
+#include "config.h"
 
 class ConnectionLogger {
   public:
@@ -12,7 +13,7 @@ class ConnectionLogger {
 
   private:
     MicroSD& _sd;
-    const char* filename = "/events.json";
+    const char* filename = EVENTS_LOG_PATH;
 };
 
 #endif

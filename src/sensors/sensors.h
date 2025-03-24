@@ -5,6 +5,9 @@
 #include "humidity-SZHJW/SoilMoistureSensor.h"
 #include "color-sensor/sensor-color.h"
 
+extern SensorColor colorSensor;           // 👈 Aquí declaras su existencia
+extern SoilMoistureSensor soilSensor;     // (si también estás usando este afuera)
+
 // Inicializa todos los sensores disponibles
 void initSensors();
 

@@ -16,7 +16,7 @@ public:
     static void handleInternetCheck(ConnectionLogger &logger);
     
 private:
-    static void startSmartConfig();
+    static void startSmartConfig(ConnectionLogger &logger);
     static void checkInternetStatus();
 };
 

@@ -6,8 +6,14 @@
 //HTTP DATA
 #define BASE_URL "http://localhost:8080"
 
-//MEMORY
-#define EEPROM_SIZE 200
+//archivo credenciales wifi
+#define WIFI_CREDENTIALS_PATH "/wifi_credentials.json"
+//archivo eventos sensores
+#define EVENTS_LOG_PATH "/events.json"
+// archivo calibracion de sensor de color
+#define CALIBRATION_FILE_PATH "/calibration.txt"
+
+
 
 //DEVICES
 #define WIFI_RESET_BUTTON_PIN 22

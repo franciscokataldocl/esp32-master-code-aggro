@@ -7,7 +7,6 @@ bool MicroSD::begin() {
         Serial.println(F("⚠️ SD CARD FAILED, OR NOT PRESENT!"));
         return false;
     }
-    Serial.println(F("✅ SD CARD INITIALIZED."));
     return true;
 }
 
@@ -58,8 +57,8 @@ String MicroSD::readFromFile(const char* filename) {
     }
     file.close();
     
-    Serial.print(F("✅ Datos leídos de: "));
-    Serial.println(filename);
+    // Serial.print(F("✅ Datos leídos de: "));
+    // Serial.println(filename);
     return fileContent;
 }
 

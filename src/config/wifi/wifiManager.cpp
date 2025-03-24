@@ -26,8 +26,8 @@ void WiFiManager::initWiFi(ConnectionLogger &logger) { //✅ Corrige esta firma
     String pss = "";
 
     String credData = sdCard.readFromFile(WIFI_CREDENTIALS_PATH);
-    Serial.println("Contenido crudo de archivo");
-Serial.println(credData);
+//     Serial.println("Contenido crudo de archivo");
+// Serial.println(credData);
 
     if (credData != "") {
         StaticJsonDocument<512> doc;

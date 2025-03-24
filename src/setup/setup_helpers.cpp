@@ -31,8 +31,7 @@ void initSystem() {
 
     String contenido = sdCard.readFromFile(EVENTS_LOG_PATH);
     if (contenido != "") {
-        Serial.println("✅ Contenido leído del archivo:");
-        Serial.println(contenido);
+     
     } else {
         Serial.println("⚠️ Archivo vacío o error en lectura.");
     }

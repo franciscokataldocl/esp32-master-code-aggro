@@ -18,7 +18,7 @@ extern SensorColor colorSensor;
 const unsigned long SENSOR_INTERVAL = 1800000;  // 30 minutos
 const unsigned long INITIAL_DELAY = DEBUG_MODE ? 5000 : 60000;  // 5 seg en debug, 1 min en prod
 
-unsigned long lastSensorRead = millis() - (SENSOR_INTERVAL - INITIAL_DELAY);
+unsigned long lastSensorRead = millis(); 
 
 void handleTasks() {
     ResetWifiCredentials::checkReset();  // 👈 este va al inicio
@@ -28,14 +28,24 @@ void handleTasks() {
 }
 
 void handlePeriodicTasks() {
-    if (millis() - lastSensorRead >= SENSOR_INTERVAL) {
-        lastSensorRead = millis();
+    unsigned long now = millis();
+    static bool firstCycle = true;
 
+    if (firstCycle && now >= INITIAL_DELAY) {
+        lastSensorRead = now;
         updateSensors();
-  // actualiza todos los sensores
-        printStoredEvents();   // imprime eventos almacenados
+        printStoredEvents();
+        firstCycle = false;
+        return;
+    }
+
+    if (!firstCycle && now - lastSensorRead >= SENSOR_INTERVAL) {
+        lastSensorRead = now;
+        updateSensors();
+        printStoredEvents();
     }
 }
+
 
 void readSensorsAndSendMQTT() {
     int r, g, b;
@@ -51,14 +61,15 @@ void readSensorsAndSendMQTT() {
 }
 
 void printStoredEvents() {
-    Serial.println("📄 Eventos actuales:");
     String data = sdCard.readFromFile(EVENTS_LOG_PATH);
 
     if (data.length() > 0) {
-        Serial.println("Contenido del archivo:");
-        Serial.println(data);  // 👈 claramente aquí imprimes el contenido
+        Serial.println("📄 Eventos actuales:");
+        Serial.println(data);  // 👈 Solo imprime si hay contenido
     } else {
-        Serial.println("⚠️ Sin eventos almacenados o archivo vacío.");
+        // No mostrar nada si no hay eventos
+        // Si quieres dejar una advertencia, puedes descomentar esto:
+        // Serial.println("⚠️ Sin eventos almacenados o archivo vacío.");
     }
 }
 
